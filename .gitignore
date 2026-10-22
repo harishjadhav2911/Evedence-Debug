@@ -38,3 +38,5 @@ data/*.json
 *.swp
 *.bak
 
+
+.vercel

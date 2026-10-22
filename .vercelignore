@@ -1,0 +1,17 @@
+# Vercel Deployment Exclusions
+# Exclude Python backend from Vercel static frontend deployment
+.venv/
+venv/
+analyzer/
+evidencedebug/
+manage.py
+requirements.txt
+Dockerfile
+Procfile
+db.sqlite3
+db.sqlite3-journal
+data/
+staticfiles/
+*.py
+*.pyc
+__pycache__/

@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "framework": null,
   "cleanUrls": true,
   "headers": [
     {
@@ -9,6 +10,20 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/styles.css",
+      "destination": "/styles.css"
+    },
+    {
+      "source": "/script.js",
+      "destination": "/script.js"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
     }
   ]
 }
