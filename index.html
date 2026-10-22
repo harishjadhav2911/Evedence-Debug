@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EvidenceDebug AI — Grounded Code Intelligence & Retrieval-Augmented Debugger</title>
+  <meta name="description" content="AI-powered code explainer and debugging assistant backed by verifiable retrieval evidence and documentation grounding.">
+  
+  <!-- Google Fonts: Newsreader (Editorial Serif), Inter (Sans-serif Body), JetBrains Mono (Monospace Code) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom Application Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="app-body">
+
+  <!-- =========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================= -->
+  <header class="app-navbar border-bottom">
+    <div class="container-fluid px-lg-4 px-3 py-2">
+      <div class="d-flex align-items-center justify-content-between">
+        
+        <!-- Brand Identity -->
+        <div class="d-flex align-items-center gap-3">
+          <a href="#" class="brand-link d-flex align-items-center gap-2 text-decoration-none" aria-label="EvidenceDebug AI Home">
+            <div class="brand-logo-mark" aria-hidden="true">
+              <!-- Minimalist geometric gold symbol: interlocking diamond & code chevron -->
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="24" height="24" rx="4" stroke="var(--color-gold)" stroke-width="1.5" fill="none" opacity="0.3"/>
+                <path d="M14 4L23 14L14 24L5 14L14 4Z" stroke="var(--color-gold)" stroke-width="1.6" fill="var(--color-gold-light)" fill-opacity="0.2"/>
+                <path d="M11 11L8.5 14L11 17" stroke="var(--color-gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M17 11L19.5 14L17 17" stroke="var(--color-gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="14" cy="14" r="1.5" fill="var(--color-gold)"/>
+              </svg>
+            </div>
+            <div>
+              <span class="brand-title">EvidenceDebug<span class="brand-title-accent">AI</span></span>
+              <span class="brand-descriptor">CODE INTELLIGENCE</span>
+            </div>
+          </a>
+
+          <!-- Subtle divider -->
+          <div class="nav-vertical-divider d-none d-md-block" aria-hidden="true"></div>
+
+          <!-- Navigation Links -->
+          <nav class="d-none d-md-flex align-items-center gap-1" aria-label="Main Navigation">
+            <button class="nav-tab-btn active" id="nav-btn-workspace" type="button" aria-current="page">
+              <i class="bi bi-code-slash me-1"></i> Workspace
+            </button>
+            <button class="nav-tab-btn" id="nav-btn-results" type="button">
+              <i class="bi bi-clipboard2-check me-1"></i> Results
+            </button>
+            <button class="nav-tab-btn" id="nav-btn-kb" type="button" data-bs-toggle="offcanvas" data-bs-target="#kbOffcanvas" aria-controls="kbOffcanvas">
+              <i class="bi bi-journals me-1"></i> Knowledge Base
+              <span class="nav-badge" id="kb-nav-count">0 docs</span>
+            </button>
+            <button class="nav-tab-btn" id="nav-btn-history" type="button" data-bs-toggle="modal" data-bs-target="#historyModal">
+              <i class="bi bi-clock-history me-1"></i> History
+            </button>
+          </nav>
+        </div>
+
+        <!-- Right Metadata & Workspace Status -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
+          
+          <!-- Sample Scenario Preset Dropdown -->
+          <div class="dropdown d-none d-sm-block">
+            <button class="btn btn-sm btn-outline-custom dropdown-toggle" type="button" id="scenarioDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-lightning-charge me-1 text-gold"></i> Load Preset
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="scenarioDropdown">
+              <li><h6 class="dropdown-header text-uppercase">Demonstration Scenarios</h6></li>
+              <li><button class="dropdown-item preset-option" data-preset="python-default-arg" type="button">
+                <strong>Python:</strong> Mutable Default Argument (List)
+              </button></li>
+              <li><button class="dropdown-item preset-option" data-preset="js-closure-async" type="button">
+                <strong>JavaScript:</strong> Loop Var Closure Bug
+              </button></li>
+              <li><button class="dropdown-item preset-option" data-preset="cpp-iterator-invalidation" type="button">
+                <strong>C++:</strong> Vector Iterator Invalidation
+              </button></li>
+              <li><button class="dropdown-item preset-option" data-preset="java-npe-unboxing" type="button">
+                <strong>Java:</strong> Automatic Unboxing NullPointer
+              </button></li>
+            </ul>
+          </div>
+
+          <!-- System Status Badge -->
+          <div class="status-pill d-none d-lg-flex align-items-center" id="system-status-pill" title="Backend connectivity status">
+            <span class="status-dot-pulse" id="status-dot"></span>
+            <span class="status-text" id="system-status-text">Connecting...</span>
+          </div>
+
+          <!-- Mode Tag -->
+          <div class="prototype-badge" id="system-mode-badge" title="Backend APIs and indexing status">
+            <i class="bi bi-info-circle me-1"></i> <span id="mode-badge-text">Demo Mode</span>
+          </div>
+
+          <!-- Mobile KB & History Trigger Buttons -->
+          <div class="d-flex d-md-none gap-1">
+            <button class="btn btn-sm btn-outline-custom p-1 px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#kbOffcanvas" title="Knowledge Base" aria-label="Open Knowledge Base">
+              <i class="bi bi-journals"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-custom p-1 px-2" type="button" data-bs-toggle="modal" data-bs-target="#historyModal" title="History" aria-label="Open History">
+              <i class="bi bi-clock-history"></i>
+            </button>
+          </div>
+
+          <!-- Quick Guide / Help Modal Trigger -->
+          <button class="btn btn-sm btn-icon-round" type="button" data-bs-toggle="modal" data-bs-target="#guideModal" title="Workflow Guide & Architecture" aria-label="Open Guide">
+            <i class="bi bi-question-lg"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       SUB-HEADER: WORKFLOW STAGE & CONTEXT BAR
+       ========================================================================= -->
+  <div class="sub-header-bar border-bottom">
+    <div class="container-fluid px-lg-4 px-3 py-1">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        
+        <!-- Workflow Philosophy Indicator -->
+        <div class="d-flex align-items-center gap-2">
+          <span class="workflow-philosophy-badge">
+            <i class="bi bi-shield-check me-1"></i> Retrieval First, Generation Second
+          </span>
+          <span class="text-secondary d-none d-md-inline" style="font-size: 0.8rem;">
+            Claims must be cited with retrieved documentation passages before conclusion synthesis.
+          </span>
+        </div>
+
+        <!-- Active Knowledge Corpus Status -->
+        <div class="d-flex align-items-center gap-2">
+          <span class="corpus-indicator">
+            <i class="bi bi-database me-1 text-gold"></i>
+            <span class="corpus-label">Corpus:</span>
+            <strong class="corpus-name" id="active-corpus-name">Python 3.12 Spec & Core Reference</strong>
+          </span>
+          <button class="btn btn-link btn-sm p-0 text-decoration-none text-gold-action" type="button" data-bs-toggle="offcanvas" data-bs-target="#kbOffcanvas">
+            Manage
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MAIN WORKSPACE (STUDENT-FRIENDLY SIMPLIFIED ARCHITECTURE)
+       ========================================================================= -->
+  <main class="workspace-main" id="mainContainer">
+    
+    <!-- =======================================================================
+         VIEW 1: CODE WORKSPACE (DEFAULT FOCUS SCREEN)
+         ======================================================================= -->
+    <div id="view-workspace" class="view-section">
+      
+      <!-- Student Hero Guidance Banner -->
+      <section class="student-hero mb-3 py-3 px-4 border rounded bg-surface">
+        <div class="row align-items-center g-3">
+          <div class="col-lg-7">
+            <h1 class="student-hero-title mb-1">Understand Your Code. Find the Bug. Learn the Fix.</h1>
+            <p class="student-hero-subtitle text-secondary mb-0">
+              An intelligent coding tutor for college students. Paste buggy code, describe the symptom, and receive an evidence-grounded diagnosis with verified fixes.
+            </p>
+          </div>
+          <div class="col-lg-5">
+            <div class="student-steps-strip p-2 px-3 rounded border bg-warm-ivory">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-1" style="font-size: 0.8rem; font-weight: 500;">
+                <span class="step-item"><span class="step-badge">1</span> Select language</span>
+                <span class="step-sep">&bull;</span>
+                <span class="step-item"><span class="step-badge">2</span> Paste code</span>
+                <span class="step-sep">&bull;</span>
+                <span class="step-item"><span class="step-badge">3</span> Describe problem</span>
+                <span class="step-sep">&bull;</span>
+                <span class="step-item"><span class="step-badge">4</span> Analyze</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Code Workspace Card -->
+      <section class="panel-card workspace-focus-card d-flex flex-column" aria-label="Code Editor Workspace">
+        
+        <!-- Editor Header Toolbar -->
+        <div class="panel-header border-bottom px-3 py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <label for="language-select" class="form-label mb-0 fw-semibold text-dark-custom" style="font-size: 0.84rem;">
+              <i class="bi bi-code-square text-gold me-1"></i> Language:
+            </label>
+            <select id="language-select" class="form-select form-select-sm language-dropdown" aria-label="Select Programming Language">
+              <option value="python" selected>Python 3</option>
+              <option value="c">C (C17 / C99)</option>
+              <option value="cpp">C++ (C++20)</option>
+              <option value="java">Java 21</option>
+              <option value="javascript">JavaScript (ES2022)</option>
+            </select>
+
+            <span class="editor-file-tab ms-2">
+              <i class="bi bi-file-earmark-code me-1 text-gold"></i>
+              <span id="current-filename">buggy_accumulator.py</span>
+            </span>
+          </div>
+
+          <!-- Quick Example Preset & Clear Controls -->
+          <div class="d-flex align-items-center gap-2">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-custom dropdown-toggle" type="button" id="workspacePresetBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-lightning-charge me-1 text-gold"></i> Try an Example Bug
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="workspacePresetBtn">
+                <li><h6 class="dropdown-header text-uppercase">Demonstration Scenarios (Presets)</h6></li>
+                <li><button class="dropdown-item preset-option" data-preset="python-default-arg" type="button">
+                  <strong>Python:</strong> Mutable Default Argument (List)
+                </button></li>
+                <li><button class="dropdown-item preset-option" data-preset="js-closure-async" type="button">
+                  <strong>JavaScript:</strong> Loop Var Closure Bug
+                </button></li>
+                <li><button class="dropdown-item preset-option" data-preset="cpp-iterator-invalidation" type="button">
+                  <strong>C++:</strong> Vector Iterator Invalidation
+                </button></li>
+                <li><button class="dropdown-item preset-option" data-preset="java-npe-unboxing" type="button">
+                  <strong>Java:</strong> Automatic Unboxing NullPointer
+                </button></li>
+              </ul>
+            </div>
+
+            <button type="button" class="btn btn-outline-custom btn-sm" id="btn-clear-workspace" title="Clear code editor">
+              <i class="bi bi-trash3 me-1"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Code Editor Body -->
+        <div class="code-editor-wrapper d-flex flex-column flex-grow-1" style="min-height: 380px;">
+          <!-- Editor Titlebar / Meta -->
+          <div class="editor-titlebar px-3 py-1 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge-subtle-mode">Source Editor</span>
+              <span class="text-secondary" style="font-size: 0.72rem;">Press Tab for 4-space indentation</span>
+            </div>
+            <div class="editor-status-text" id="editor-cursor-pos">
+              Ln <span id="cur-line">1</span>, Col <span id="cur-col">1</span>
+            </div>
+          </div>
+
+          <div class="editor-body-container flex-grow-1 position-relative">
+            <div class="editor-gutters" id="editor-gutter" aria-hidden="true">
+              <span>1</span>
+            </div>
+            <textarea 
+              id="code-editor-textarea" 
+              class="editor-textarea" 
+              spellcheck="false" 
+              autocorrect="off" 
+              autocapitalize="off"
+              placeholder="Paste or write your source code here..."
+              aria-label="Code Editor"></textarea>
+          </div>
+        </div>
+
+        <!-- Problem Description Input (Optional) -->
+        <div class="problem-context-box border-top p-3 bg-surface">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <label for="problem-description" class="form-label mb-0 fw-medium text-dark-custom" style="font-size: 0.84rem;">
+              <i class="bi bi-chat-left-text me-1 text-gold"></i> Describe the problem you noticed (Optional):
+            </label>
+            <span class="char-count text-secondary" id="desc-char-count">0 / 500</span>
+          </div>
+          <textarea 
+            id="problem-description" 
+            class="form-control form-control-sm custom-input" 
+            rows="2" 
+            placeholder="e.g. Function keeps old items when called multiple times without second argument..."
+            aria-label="Observed Behavior"></textarea>
+        </div>
+
+        <!-- Prominent Action Footer -->
+        <div class="panel-footer border-top p-3 d-flex align-items-center justify-content-between bg-surface flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-secondary" style="font-size: 0.8rem;">
+              <i class="bi bi-shield-check text-gold me-1"></i>
+              Answers are cited against verified documentation passages from your Knowledge Base.
+            </span>
+          </div>
+          
+          <button type="button" class="btn btn-gold btn-lg px-4 py-2 d-flex align-items-center gap-2 shadow-sm" id="btn-analyze-code">
+            <span class="spinner-border spinner-border-sm d-none" id="analyze-spinner" role="status" aria-hidden="true"></span>
+            <i class="bi bi-play-circle-fill fs-5" id="analyze-icon"></i>
+            <span id="analyze-btn-text" class="fw-semibold">Analyze My Code</span>
+          </button>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- =======================================================================
+         VIEW 2: ANALYSIS RESULTS VIEW (DEDICATED POST-ANALYSIS SCREEN)
+         ======================================================================= -->
+    <div id="view-results" class="view-section d-none">
+      
+      <!-- Top Action Bar -->
+      <div class="results-action-bar p-3 mb-3 border rounded bg-surface d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <button type="button" class="btn btn-outline-custom btn-sm d-flex align-items-center gap-1" id="btn-back-to-editor">
+            <i class="bi bi-arrow-left"></i>
+            <span class="fw-medium">Back to Code</span>
+          </button>
+
+          <div class="vr mx-1 d-none d-sm-block"></div>
+
+          <!-- Results Sub-tabs -->
+          <div class="nav nav-pills custom-nav-pills" id="resultsSubTabs" role="tablist">
+            <button class="nav-link active" id="subtab-results-btn" data-bs-toggle="pill" data-bs-target="#subtab-results" type="button" role="tab" aria-selected="true">
+              <i class="bi bi-clipboard2-check me-1"></i> Analysis Results
+            </button>
+            <button class="nav-link" id="subtab-rag-btn" data-bs-toggle="pill" data-bs-target="#subtab-rag" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-diagram-3 me-1"></i> RAG Retrieval
+              <span class="badge rounded-pill bg-gold-subtle text-dark ms-1" id="rag-passages-badge">0 Passages</span>
+            </button>
+            <button class="nav-link" id="subtab-evidence-btn" data-bs-toggle="pill" data-bs-target="#subtab-evidence" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-journals me-1"></i> Evidence &amp; Sources
+              <span class="badge rounded-pill bg-gold-subtle text-dark ms-1" id="evidence-count-badge">0</span>
+            </button>
+            <button class="nav-link" id="subtab-advanced-btn" data-bs-toggle="pill" data-bs-target="#subtab-advanced" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-cpu me-1"></i> Technical Signals (Optional)
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <span class="demo-tag" id="analysis-demo-tag">LIVE ANALYSIS</span>
+          <button type="button" class="btn btn-outline-custom btn-sm" id="btn-export-markdown" title="Export markdown summary">
+            <i class="bi bi-download me-1"></i> Export Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content" id="resultsSubTabContent">
+        
+        <!-- SUBTAB 1: ANALYSIS RESULTS (THE 5 STUDENT SECTIONS) -->
+        <div class="tab-pane fade show active" id="subtab-results" role="tabpanel" aria-labelledby="subtab-results-btn">
+          
+          <!-- Sub-Tab Header Banner -->
+          <div class="subtab-header-banner d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+              <h2 class="fs-5 fw-semibold text-dark-custom mb-1">
+                <i class="bi bi-clipboard2-check text-gold me-2"></i>Analysis Results
+              </h2>
+              <span class="text-secondary" style="font-size: 0.82rem;">
+                Five-step educational diagnosis, root cause breakdown, and verified code correction.
+              </span>
+            </div>
+            <span class="badge rounded-pill bg-gold-subtle text-dark px-3 py-2 fw-medium">
+              Analysis View
+            </span>
+          </div>
+
+          <!-- 1. Simple Explanation -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="section-step-num">01</span>
+                <h3 class="student-section-heading mb-0">Simple Explanation</h3>
+              </div>
+              <span class="badge-subtle-success" id="engine-badge-label">
+                <i class="bi bi-stars text-gold me-1"></i> Grounded Explanation
+              </span>
+            </div>
+            <div class="student-tldr-box p-3 rounded" id="student-summary-content">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 2. Root Cause / What Went Wrong -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="section-step-num">02</span>
+                <h3 class="student-section-heading mb-0">Root Cause &mdash; What Went Wrong</h3>
+              </div>
+              <span class="grounding-confidence-tag" id="grounding-confidence-label">
+                <i class="bi bi-shield-check text-gold me-1"></i> Evidence Grounded
+              </span>
+            </div>
+            
+            <div id="root-cause-paragraphs" class="mb-3">
+              <!-- Populated by JS -->
+            </div>
+
+            <h4 class="fs-6 fw-semibold text-dark-custom mb-2">Execution Lifecycle Breakdown:</h4>
+            <div class="lifecycle-timeline" id="lifecycle-timeline-content">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 3. Issues Found -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="section-step-num">03</span>
+                <h3 class="student-section-heading mb-0">Issues Found</h3>
+              </div>
+              <span class="badge rounded-pill bg-gold-subtle text-dark" id="issues-count-badge">1 Issue</span>
+            </div>
+            
+            <div id="issues-list-container">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 4. Corrected Code -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="section-step-num">04</span>
+                <h3 class="student-section-heading mb-0">Corrected Code</h3>
+              </div>
+              <button class="btn btn-sm btn-outline-custom" id="btn-copy-fixed-code" type="button" title="Copy code to clipboard">
+                <i class="bi bi-clipboard me-1" id="copy-icon"></i>
+                <span id="copy-btn-text">Copy Code</span>
+              </button>
+            </div>
+            
+            <div class="fixed-code-card mb-0">
+              <div class="fixed-code-body p-3 bg-editor position-relative rounded">
+                <pre class="mb-0"><code class="language-python" id="fixed-code-snippet"></code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Learn Why This Fix Works -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="section-step-num">05</span>
+                <h3 class="student-section-heading mb-0">Learn Why This Fix Works</h3>
+              </div>
+              <span class="text-secondary" style="font-size: 0.78rem;">Key Takeaway</span>
+            </div>
+            <div id="learn-why-content">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Return to Code Button at bottom -->
+          <div class="text-center py-3">
+            <button type="button" class="btn btn-outline-custom btn-md px-4" id="btn-bottom-back-to-editor">
+              <i class="bi bi-arrow-left me-1"></i> Back to Code Editor
+            </button>
+          </div>
+
+        </div>
+
+        <!-- SUBTAB 2: RAG RETRIEVAL (VISUAL WORKFLOW FOR STUDENTS) -->
+        <div class="tab-pane fade" id="subtab-rag" role="tabpanel" aria-labelledby="subtab-rag-btn">
+          
+          <!-- Sub-Tab Header Banner -->
+          <div class="subtab-header-banner d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+              <h2 class="fs-5 fw-semibold text-dark-custom mb-1">
+                <i class="bi bi-diagram-3 text-gold me-2"></i>RAG Retrieval Workflow
+              </h2>
+              <span class="text-secondary" style="font-size: 0.82rem;">
+                Visual step-by-step vector search against your indexed Knowledge Base documentation.
+              </span>
+            </div>
+            <span class="badge rounded-pill bg-gold-subtle text-dark px-3 py-2 fw-medium">
+              Retrieval Pipeline
+            </span>
+          </div>
+
+          <!-- Plain English Introductory Banner -->
+          <div class="alert alert-subtle-gold p-3 mb-4 rounded border">
+            <div class="d-flex align-items-start gap-2">
+              <i class="bi bi-info-circle-fill text-gold mt-1 flex-shrink-0 fs-5"></i>
+              <div>
+                <h4 class="fs-6 fw-semibold text-dark mb-1">How RAG Retrieval Works in EvidenceDebug AI</h4>
+                <p class="mb-0 text-dark-custom" style="font-size: 0.88rem; line-height: 1.5;">
+                  First, EvidenceDebug AI searches your uploaded programming documentation. Then it uses the retrieved evidence to help explain the code.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- RAG Step-by-Step Flow -->
+          <div class="rag-workflow-container">
+            
+            <!-- Step 1: Code Signals & Search Queries -->
+            <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="section-step-num">Step 1</span>
+                  <h3 class="student-section-heading mb-0">Code Signals &amp; Generated Search Queries</h3>
+                </div>
+                <span class="badge-subtle-mode" id="rag-step1-status">Queries Formed</span>
+              </div>
+              <p class="text-secondary mb-3" style="font-size: 0.84rem;">
+                EvidenceDebug AI inspects your code for syntax patterns and generates targeted search queries to search your Knowledge Base.
+              </p>
+
+              <div class="mb-3">
+                <strong class="d-block text-dark-custom mb-1" style="font-size: 0.82rem;">Detected Code Patterns:</strong>
+                <div class="d-flex flex-wrap gap-2" id="rag-detected-signals">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <div>
+                <strong class="d-block text-dark-custom mb-1" style="font-size: 0.82rem;">Search Queries Generated:</strong>
+                <div class="rag-queries-list d-flex flex-column gap-2" id="rag-generated-queries">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Retrieved Document Passages & Similarity Scores -->
+            <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="section-step-num">Step 2</span>
+                  <h3 class="student-section-heading mb-0">Retrieved Document Passages</h3>
+                </div>
+                <span class="badge rounded-pill bg-gold-subtle text-dark" id="rag-retrieved-count-badge">0 Found</span>
+              </div>
+              <p class="text-secondary mb-3" style="font-size: 0.84rem;">
+                Actual document passages matched from your Knowledge Base vector index, ranked by relevance score.
+              </p>
+
+              <div id="rag-retrieved-passages-list">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Step 3: Evidence Grounding & AI Explanation -->
+            <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="section-step-num">Step 3</span>
+                  <h3 class="student-section-heading mb-0">Evidence Grounding &amp; AI Explanation</h3>
+                </div>
+                <span class="badge-subtle-success" id="rag-step3-badge">
+                  <i class="bi bi-shield-check me-1"></i> Grounded
+                </span>
+              </div>
+              <p class="text-secondary mb-2" style="font-size: 0.84rem;">
+                The AI synthesizes the diagnosis and fix, referencing retrieved passages (e.g. <span class="badge-source-inline">[S1]</span>) to justify every technical statement.
+              </p>
+              <div class="p-3 rounded bg-warm-ivory border" id="rag-grounding-summary-box">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- SUBTAB 3: EVIDENCE & SOURCES -->
+        <div class="tab-pane fade" id="subtab-evidence" role="tabpanel" aria-labelledby="subtab-evidence-btn">
+          
+          <!-- Sub-Tab Header Banner -->
+          <div class="subtab-header-banner d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+              <h2 class="fs-5 fw-semibold text-dark-custom mb-1">
+                <i class="bi bi-journals text-gold me-2"></i>Evidence &amp; Sources
+              </h2>
+              <span class="text-secondary" style="font-size: 0.82rem;">
+                Full repository of retrieved document passages and grounded claims verification index.
+              </span>
+            </div>
+            <span class="badge rounded-pill bg-gold-subtle text-dark px-3 py-2 fw-medium">
+              Sources Repository
+            </span>
+          </div>
+
+          <!-- Grounding Classification Legend -->
+          <div class="grounding-legend-bar border rounded p-3 mb-3 bg-warm-ivory">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <strong class="text-dark-custom" style="font-size: 0.88rem;">Evidence Grounding Protocol:</strong>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="claim-badge badge-doc-backed" title="Directly supported by retrieved documentation passage">
+                  <i class="bi bi-check2-circle me-1"></i> DOC-BACKED
+                </span>
+                <span class="claim-badge badge-general-knowledge" title="Standard programming syntax / common knowledge">
+                  <i class="bi bi-book me-1"></i> GENERAL KNOWLEDGE
+                </span>
+                <span class="claim-badge badge-unsupported" title="Speculative statement or unverified claim">
+                  <i class="bi bi-exclamation-octagon me-1"></i> UNSUPPORTED
+                </span>
+              </div>
+            </div>
+            <p class="legend-note mb-0 text-secondary" style="font-size: 0.8rem;">
+              Claims citing official documentation passages are tagged <strong class="text-success">DOC-BACKED</strong> with source markers (e.g. [S1]). Explanations without specific indexed files are labeled <strong class="text-secondary">GENERAL KNOWLEDGE</strong> or <strong class="text-danger">UNSUPPORTED</strong>.
+            </p>
+          </div>
+
+          <!-- Retrieved Documentation Passages -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-book-half text-gold fs-5"></i>
+                <h3 class="student-section-heading mb-0">Retrieved Documentation Passages</h3>
+              </div>
+              <span class="text-secondary" style="font-size: 0.8rem;" id="passage-count-label">0 Passages Grounded</span>
+            </div>
+            
+            <div class="passages-container" id="passages-container">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Grounded Claims Table -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <h3 class="student-section-heading mb-2">Grounded Claims Index</h3>
+            <div class="table-responsive">
+              <table class="table table-sm grounding-table mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width: 12%;">Ref</th>
+                    <th scope="col" style="width: 48%;">Statement Claim</th>
+                    <th scope="col" style="width: 20%;">Classification</th>
+                    <th scope="col" style="width: 20%;">Source</th>
+                  </tr>
+                </thead>
+                <tbody id="grounded-claims-tbody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SUBTAB 3: TECHNICAL SIGNALS (OPTIONAL) -->
+        <div class="tab-pane fade" id="subtab-advanced" role="tabpanel" aria-labelledby="subtab-advanced-btn">
+          
+          <div class="alert alert-subtle-gold mb-3" style="font-size: 0.82rem;">
+            <i class="bi bi-info-circle me-1 text-gold"></i>
+            These technical signals represent low-level AST syntax cues and embedding vector queries generated under the hood by the RAG pipeline.
+          </div>
+
+          <!-- Extracted Code Signals -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <h3 class="student-section-heading mb-2">AST &amp; Syntax Signals</h3>
+            <div class="signals-chip-container d-flex flex-wrap gap-2" id="signals-container">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Generated Retrieval Queries -->
+          <div class="student-section-card mb-3 p-3 border rounded bg-surface">
+            <h3 class="student-section-heading mb-2">Vector &amp; Lexical Retrieval Queries</h3>
+            <div class="queries-list" id="queries-container">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- =========================================================================
+       KNOWLEDGE BASE OFFCANVAS DRAWER
+       ========================================================================= -->
+  <div class="offcanvas offcanvas-end custom-offcanvas" tabindex="-1" id="kbOffcanvas" aria-labelledby="kbOffcanvasLabel">
+    <div class="offcanvas-header border-bottom px-4 py-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="offcanvas-icon-wrap" aria-hidden="true">
+          <i class="bi bi-journals text-gold"></i>
+        </div>
+        <div>
+          <h3 class="offcanvas-title mb-0" id="kbOffcanvasLabel">Knowledge Base</h3>
+          <span class="offcanvas-subtitle">Document indexing corpus for RAG retrieval</span>
+        </div>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-4">
+      
+      <!-- Student-Friendly Guidance Banner -->
+      <div class="alert alert-subtle-gold mb-4" role="alert">
+        <div class="d-flex align-items-start gap-2">
+          <i class="bi bi-info-circle-fill text-gold mt-1 flex-shrink-0"></i>
+          <div style="font-size: 0.82rem; line-height: 1.5;">
+            <strong>Course Documentation &amp; Standards:</strong> Upload official language specifications, class notes, or reference docs (.pdf, .txt, .md up to 25MB). When you debug, the AI retrieves relevant passages and cites them as proof.
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Upload Zone -->
+      <div class="drop-zone-card mb-4 p-4 text-center" id="kb-drop-zone">
+        <input type="file" id="kb-file-input" class="d-none" multiple accept=".pdf,.txt,.md">
+        <div class="drop-zone-icon mb-2">
+          <i class="bi bi-cloud-arrow-up text-gold"></i>
+        </div>
+        <h4 class="drop-zone-title mb-1">Drag &amp; drop documentation here</h4>
+        <p class="drop-zone-desc text-secondary mb-3" style="font-size: 0.8rem;">
+          Upload official language specs, lecture notes, or textbooks (.PDF, .TXT, .MD up to 25MB).
+        </p>
+        <button type="button" class="btn btn-outline-custom btn-sm px-3" id="btn-browse-docs">
+          <i class="bi bi-folder2-open me-1"></i> Browse Files
+        </button>
+      </div>
+
+      <!-- Upload Validation Feedback Alert (Hidden by default) -->
+      <div class="alert alert-danger d-none py-2 px-3 mb-3" id="upload-error-alert" style="font-size: 0.82rem;">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="upload-error-msg">Invalid file type. Only .pdf, .txt, and .md files are accepted.</span>
+      </div>
+
+      <!-- Active Indexed Documents List -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h4 class="corpus-section-title mb-0">Active Indexed Corpus (<span id="kb-doc-count">0</span>)</h4>
+        <button class="btn btn-link btn-sm p-0 text-secondary text-decoration-none" id="btn-reset-docs" title="Refresh document list from server">
+          <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+        </button>
+      </div>
+
+      <div class="kb-doc-list" id="kb-doc-list">
+        <!-- Live empty state displayed when no documents are uploaded -->
+        <div class="text-center py-4 px-2 text-secondary" id="kb-empty-state" style="font-size: 0.85rem;">
+          <i class="bi bi-folder2-open fs-3 d-block mb-2 text-gold"></i>
+          No documents in your Knowledge Base yet.<br>
+          Upload PDF, TXT, or Markdown documentation above to enable grounded citations.
+        </div>
+      </div>
+
+      <!-- Corpus Statistics Card -->
+      <div class="corpus-stats-card p-3 mt-4 rounded border bg-warm-ivory">
+        <h5 class="stats-title mb-2">Vector Index Status (FAISS)</h5>
+        <div class="row g-2 text-center">
+          <div class="col-4">
+            <div class="stat-num text-dark-custom" id="stat-total-chunks">0</div>
+            <div class="stat-lbl text-secondary">Chunks</div>
+          </div>
+          <div class="col-4">
+            <div class="stat-num text-dark-custom">384</div>
+            <div class="stat-lbl text-secondary">Dim Vector</div>
+          </div>
+          <div class="col-4">
+            <div class="stat-num text-dark-custom">FAISS CPU</div>
+            <div class="stat-lbl text-secondary">Index Type</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="offcanvas-footer border-top p-3 px-4 bg-surface d-flex align-items-center justify-content-between">
+      <span class="text-secondary" style="font-size: 0.78rem;">
+        Django hook: <code>/api/v1/documents/</code>
+      </span>
+      <button type="button" class="btn btn-outline-custom btn-sm" data-bs-dismiss="offcanvas">Close Drawer</button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       HISTORY MODAL
+       ========================================================================= -->
+  <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content custom-modal">
+        <div class="modal-header border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-gold fs-5"></i>
+            <div>
+              <h3 class="modal-title fs-5 mb-0" id="historyModalLabel">Analysis History</h3>
+              <span class="text-secondary" style="font-size: 0.78rem;">Previous debugging sessions and grounded retrieval traces</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-secondary mb-3" style="font-size: 0.85rem;">
+            Click on any previous session to restore its code, retrieval trace, and grounded explanations into your current workspace.
+          </p>
+          <div class="history-list" id="history-items-container">
+            <!-- Populated dynamically by script.js -->
+          </div>
+        </div>
+        <div class="modal-footer border-top px-4 py-2 bg-warm-ivory d-flex align-items-center justify-content-between">
+          <span class="text-secondary" style="font-size: 0.78rem;">
+            Django hook: <code>/api/v1/history/</code>
+          </span>
+          <button type="button" class="btn btn-outline-custom btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       DOCUMENT CHUNK INSPECTION MODAL
+       ========================================================================= -->
+  <div class="modal fade" id="chunkInspectModal" tabindex="-1" aria-labelledby="chunkInspectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content custom-modal">
+        <div class="modal-header border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="source-id-badge" id="modal-chunk-id">[S1]</span>
+            <div>
+              <h3 class="modal-title fs-5 mb-0" id="chunkInspectModalLabel">Passage Inspection</h3>
+              <span class="text-secondary" style="font-size: 0.78rem;" id="modal-chunk-source">Python 3.12 Reference Manual</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="chunk-meta-bar p-2 px-3 mb-3 rounded border bg-warm-ivory d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+              <span class="text-secondary" style="font-size: 0.75rem;">METRIC:</span>
+              <strong class="ms-1" style="font-size: 0.85rem;" id="modal-chunk-score">Cosine Similarity: 0.94 (Illustrative)</strong>
+            </div>
+            <div>
+              <span class="text-secondary" style="font-size: 0.75rem;">CHUNK ID:</span>
+              <code class="ms-1" id="modal-chunk-hash">chunk_py312_sec86_042</code>
+            </div>
+          </div>
+          
+          <h4 class="fs-6 fw-semibold text-dark-custom mb-2">Original Extracted Text:</h4>
+          <div class="chunk-body-quote p-3 rounded border mb-3 bg-surface" id="modal-chunk-body">
+            <!-- Populated by JS -->
+          </div>
+
+          <div class="alert alert-subtle-gold mb-0" style="font-size: 0.8rem;">
+            <i class="bi bi-info-circle me-1 text-gold"></i>
+            This passage was retrieved via dense vector similarity matching against the code signal <code>FunctionDef.args.defaults</code>.
+          </div>
+        </div>
+        <div class="modal-footer border-top px-4 py-2 bg-warm-ivory">
+          <button type="button" class="btn btn-outline-custom btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       SYSTEM ARCHITECTURE & GUIDE MODAL
+       ========================================================================= -->
+  <div class="modal fade" id="guideModal" tabindex="-1" aria-labelledby="guideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content custom-modal">
+        <div class="modal-header border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-diagram-3 text-gold fs-5"></i>
+            <div>
+              <h3 class="modal-title fs-5 mb-0" id="guideModalLabel">EvidenceDebug AI — Architecture &amp; Methodology</h3>
+              <span class="text-secondary" style="font-size: 0.78rem;">Retrieval-Augmented Generation for Grounded Code Explanations</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-4">
+            <h4 class="fs-6 fw-semibold text-dark-custom mb-2">1. The Problem with Ungrounded Code Assistants</h4>
+            <p class="text-secondary" style="font-size: 0.88rem; line-height: 1.6;">
+              Generic large language models frequently hallucinate non-existent API parameters, misinterpret subtle runtime semantics, and suggest speculative fixes without verifiable justification. In mission-critical software, a developer cannot trust an AI suggestion without proof.
+            </p>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="fs-6 fw-semibold text-dark-custom mb-2">2. Our Philosophy: Retrieval First, Generation Second</h4>
+            <p class="text-secondary" style="font-size: 0.88rem; line-height: 1.6;">
+              EvidenceDebug AI enforces a strict protocol: before a single explanatory word is synthesized, the system must parse AST signals from the code, query the indexed knowledge base of official specifications and standards, and retrieve exact passages. Every claim in the final explanation is tagged with its evidence category:
+            </p>
+            <div class="d-flex flex-column gap-2 mt-2">
+              <div class="p-2 px-3 rounded border bg-warm-ivory d-flex align-items-center gap-2">
+                <span class="claim-badge badge-doc-backed">DOC-BACKED</span>
+                <span style="font-size: 0.82rem;">Directly supported by a retrieved documentation passage from the verified corpus.</span>
+              </div>
+              <div class="p-2 px-3 rounded border bg-warm-ivory d-flex align-items-center gap-2">
+                <span class="claim-badge badge-general-knowledge">GENERAL KNOWLEDGE</span>
+                <span style="font-size: 0.82rem;">Common programming language syntax or standard algorithmic principles.</span>
+              </div>
+              <div class="p-2 px-3 rounded border bg-warm-ivory d-flex align-items-center gap-2">
+                <span class="claim-badge badge-unsupported">UNSUPPORTED</span>
+                <span style="font-size: 0.82rem;">Speculative inference or heuristic advice requiring independent developer verification.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <h4 class="fs-6 fw-semibold text-dark-custom mb-2">3. Upcoming Django Backend Integration Points</h4>
+            <p class="text-secondary mb-2" style="font-size: 0.85rem;">
+              This frontend interface is architected to seamlessly attach to the upcoming Django RAG backend:
+            </p>
+            <ul class="text-secondary ps-3 mb-0" style="font-size: 0.82rem; line-height: 1.6;">
+              <li><code>POST /api/v1/analyze/</code> &mdash; Accepts source code, language, and problem context; runs AST parser and returns trace ID.</li>
+              <li><code>GET /api/v1/retrieval-trace/{id}/</code> &mdash; Streams retrieved passages, chunk scores, and source metadata via SSE.</li>
+              <li><code>POST /api/v1/documents/upload/</code> &mdash; Multipart upload for PDF/TXT document chunking and vector embedding generation.</li>
+              <li><code>POST /api/v1/grounding/verify/</code> &mdash; Runs NLI (Natural Language Inference) claim-evidence alignment checks.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer border-top px-4 py-2 bg-warm-ivory">
+          <button type="button" class="btn btn-gold btn-sm" data-bs-dismiss="modal">Got It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    <div id="appToast" class="toast custom-toast align-items-center border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2 py-2" id="toast-message">
+          <i class="bi bi-check-circle-fill text-gold"></i>
+          <span>Action completed successfully.</span>
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle with Popper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Application Logic -->
+  <script src="script.js"></script>
+</body>
+</html>
